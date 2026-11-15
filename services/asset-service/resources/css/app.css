@@ -1,0 +1,21 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Charte graphique PatriGest */
+    --color-navy: #17324D;
+    --color-primary: #245B83;
+    --color-primary-light: #EAF2F8;
+    --color-background: #F4F7FA;
+    --color-ink: #202830;
+    --color-success: #23845B;
+    --color-warning: #D98B32;
+    --color-danger: #C74747;
+}

@@ -1,0 +1,122 @@
+
+name: patrigesti-local
+
+services:
+
+  # Microservice d'authentification
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./services/auth-service:/var/www
+      - auth_vendor:/var/www/vendor
+      # Écritures runtime hors OneDrive (sessions, cache, vues compilées, logs)
+      - auth_storage_sessions:/var/www/storage/framework/sessions
+      - auth_storage_cache:/var/www/storage/framework/cache
+      - auth_storage_views:/var/www/storage/framework/views
+      - auth_storage_logs:/var/www/storage/logs
+      - ./infrastructure/php/opcache-dev.ini:/usr/local/etc/php/conf.d/zz-opcache-dev.ini:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - patri-network
+
+  # Microservice du patrimoine (biens)
+  asset-service:
+    build:
+      context: ./services/asset-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./services/asset-service:/var/www
+      - asset_vendor:/var/www/vendor
+      - asset_storage_sessions:/var/www/storage/framework/sessions
+      - asset_storage_cache:/var/www/storage/framework/cache
+      - asset_storage_views:/var/www/storage/framework/views
+      - asset_storage_logs:/var/www/storage/logs
+      - ./infrastructure/php/opcache-dev.ini:/usr/local/etc/php/conf.d/zz-opcache-dev.ini:ro
+    depends_on:
+      asset-db-init:
+        condition: service_completed_successfully
+    networks:
+      - patri-network
+
+  # Création idempotente de la base patrimoine, y compris avec un volume PostgreSQL existant
+  asset-db-init:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      PGHOST: postgres
+      PGDATABASE: postgres
+      PGUSER: patri_user
+      PGPASSWORD: patri_dev_password
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if ! psql -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'asset_db'" | grep -q 1; then
+          createdb asset_db
+        fi
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - patri-network
+
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auth_service
+      POSTGRES_USER: patri_user
+      POSTGRES_PASSWORD: patri_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U patri_user -d auth_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - patri-network
+
+  # Serveur web
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./services/auth-service:/var/www:ro
+      - auth_vendor:/var/www/vendor:ro
+      - ./services/asset-service:/var/www-asset:ro
+      - asset_vendor:/var/www-asset/vendor:ro
+      - ./infrastructure/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - auth-service
+    networks:
+      - patri-network
+
+volumes:
+  auth_pgdata:
+  auth_vendor:
+  asset_vendor:
+  auth_storage_sessions:
+  auth_storage_cache:
+  auth_storage_views:
+  auth_storage_logs:
+  asset_storage_sessions:
+  asset_storage_cache:
+  asset_storage_views:
+  asset_storage_logs:
+
+networks:
+  patri-network:
+    driver: bridge
