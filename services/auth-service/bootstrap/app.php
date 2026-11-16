@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Foundation\Application;
@@ -12,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+
+        // Faire confiance au proxy HTTPS de Render
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
