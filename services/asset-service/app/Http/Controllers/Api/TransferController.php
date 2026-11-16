@@ -8,6 +8,7 @@ use App\Http\Requests\RejectTransferRequest;
 use App\Http\Requests\StoreTransferRequest;
 use App\Http\Resources\AssetTransferResource;
 use App\Models\Asset;
+use App\Support\Notifier;
 use App\Models\AssetTransfer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -106,6 +107,14 @@ class TransferController extends Controller
             }
         });
 
+        Notifier::send(
+            $transfer->requested_by,
+            'transfert_approuve',
+            'Transfert approuvé',
+            'Le bien '.$transfer->asset->reference.' a été transféré.',
+            '/patrimoine/'.$transfer->asset_id
+        );
+
         return new AssetTransferResource(
             $transfer->fresh()->load('asset:id,reference,designation,type')
         );
@@ -130,6 +139,14 @@ class TransferController extends Controller
             'decision_motif' => $request->validated('motif'),
             'decided_at' => now(),
         ]);
+
+        Notifier::send(
+            $transfer->requested_by,
+            'transfert_rejete',
+            'Transfert rejeté',
+            'Motif : '.$request->validated('motif'),
+            '/patrimoine/'.$transfer->asset_id
+        );
 
         return new AssetTransferResource(
             $transfer->fresh()->load('asset:id,reference,designation,type')

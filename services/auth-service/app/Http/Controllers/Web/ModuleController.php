@@ -183,29 +183,36 @@ class ModuleController extends Controller
 
     public function notifications(Request $request): View
     {
-        // Notifications consolidées depuis les files de validation (données réelles).
         $api = AssetApiClient::forSession($request);
-        $items = [];
 
-        $paths = [
-            'validation' => '/api/v1/asset-submissions',
-            'affectation' => '/api/v1/assignments',
-            'transfert' => '/api/v1/transfers',
-        ];
+        $res = $api->get('/api/v1/notifications', ['per_page' => 30]);
+        $items = $res?->successful() ? ($res->json('data') ?? []) : [];
+        $meta = $res?->successful() ? ($res->json('meta') ?? []) : [];
 
-        $responses = $api->poolGet(array_fill_keys($paths, ['status' => 'en_attente', 'per_page' => 10]));
+        return view('notifications.index', [
+            'items' => $items,
+            'meta' => $meta,
+            'apiError' => $res === null || ! $res->successful(),
+        ]);
+    }
 
-        foreach ($paths as $label => $path) {
-            foreach (($responses[$path] ?? null)?->json('data') ?? [] as $item) {
-                $items[] = [
-                    'label' => ucfirst($label).' en attente de validation',
-                    'detail' => '#'.$item['id'],
-                    'date' => $item['created_at'] ?? null,
-                ];
-            }
-        }
+    /** Marque une notification comme lue puis redirige vers son lien. */
+    public function notificationRead(Request $request, int $id): RedirectResponse
+    {
+        $api = AssetApiClient::forSession($request);
+        $api->post("/api/v1/notifications/{$id}/read");
 
-        return view('notifications.index', ['items' => $items]);
+        $link = $request->input('link');
+
+        return redirect(is_string($link) && str_starts_with($link, '/') ? $link : route('notifications.index'));
+    }
+
+    public function notificationsReadAll(Request $request): RedirectResponse
+    {
+        $api = AssetApiClient::forSession($request);
+        $api->post('/api/v1/notifications/read-all');
+
+        return back()->with('success', 'Toutes les notifications ont été marquées comme lues.');
     }
 
     public function administration(Request $request): View

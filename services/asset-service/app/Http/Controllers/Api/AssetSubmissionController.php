@@ -8,6 +8,7 @@ use App\Http\Requests\RejectAssetSubmissionRequest;
 use App\Http\Requests\StoreAssetSubmissionRequest;
 use App\Http\Resources\AssetSubmissionResource;
 use App\Models\Asset;
+use App\Support\Notifier;
 use App\Models\AssetSubmission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -105,6 +106,14 @@ class AssetSubmissionController extends Controller
             $submission->asset()->update(['status' => Asset::STATUS_ACTIF]);
         });
 
+        Notifier::send(
+            $submission->requested_by,
+            'soumission_approuvee',
+            'Création de bien approuvée',
+            'Le bien '.$submission->asset->reference.' ('.$submission->asset->designation.') est maintenant actif.',
+            '/patrimoine/'.$submission->asset_id
+        );
+
         return new AssetSubmissionResource(
             $submission->fresh()->load('asset:id,reference,designation,type,status')
         );
@@ -134,6 +143,14 @@ class AssetSubmissionController extends Controller
 
             $submission->asset()->update(['status' => Asset::STATUS_BROUILLON]);
         });
+
+        Notifier::send(
+            $submission->requested_by,
+            'soumission_rejetee',
+            'Création de bien rejetée',
+            'Motif : '.$request->validated('motif'),
+            '/patrimoine/'.$submission->asset_id
+        );
 
         return new AssetSubmissionResource(
             $submission->fresh()->load('asset:id,reference,designation,type,status')

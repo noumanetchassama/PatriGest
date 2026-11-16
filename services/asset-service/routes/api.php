@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\MaintenanceController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\TransferController;
 use Illuminate\Support\Facades\Route;
@@ -139,5 +140,11 @@ Route::prefix('v1')->group(function () {
         // Rapports
         Route::get('/reports/overview', [ReportController::class, 'overview'])
             ->middleware('auth.patri:view-reports');
+
+        // Notifications personnelles (tout utilisateur authentifié)
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
     });
 });

@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/rapports', [ModuleController::class, 'rapports'])->name('rapports.index');
     Route::get('/rapports/export/{type}', [ModuleController::class, 'rapportsExport'])->whereIn('type', ['assets', 'overview'])->name('rapports.export');
     Route::get('/notifications', [ModuleController::class, 'notifications'])->name('notifications.index');
+    Route::post('/notifications/read-all', [ModuleController::class, 'notificationsReadAll'])->name('notifications.read-all');
+    Route::post('/notifications/{id}/read', [ModuleController::class, 'notificationRead'])->whereNumber('id')->name('notifications.read');
     Route::get('/administration', [ModuleController::class, 'administration'])->name('administration.index');
     Route::get('/parametres', [ModuleController::class, 'profil'])->name('profil.show');
     Route::post('/parametres/password', [ModuleController::class, 'updatePassword'])->name('profil.password');

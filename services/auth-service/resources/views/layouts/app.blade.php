@@ -69,7 +69,9 @@
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3A6 6 0 0 0 6 11v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 0 1-6 0v-1m6 0H9"/>
                     </svg>
-                    <span class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white">3</span>
+                    @if (($unreadNotifications ?? 0) > 0)
+                        <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>
+                    @endif
                 </a>
                 <div class="flex items-center gap-3 border-l border-border pl-4">
                     <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary">

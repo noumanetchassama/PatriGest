@@ -8,6 +8,7 @@ use App\Http\Requests\RejectAssignmentRequest;
 use App\Http\Requests\StoreAssignmentRequest;
 use App\Http\Resources\AssetAssignmentResource;
 use App\Models\Asset;
+use App\Support\Notifier;
 use App\Models\AssetAssignment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -99,6 +100,14 @@ class AssignmentController extends Controller
             ]);
         });
 
+        Notifier::send(
+            $assignment->requested_by,
+            'affectation_approuvee',
+            'Affectation approuvée',
+            'Le bien '.$assignment->asset->reference.' a été affecté.',
+            '/patrimoine/'.$assignment->asset_id
+        );
+
         return new AssetAssignmentResource(
             $assignment->fresh()->load('asset:id,reference,designation,type')
         );
@@ -123,6 +132,14 @@ class AssignmentController extends Controller
             'decision_motif' => $request->validated('motif'),
             'decided_at' => now(),
         ]);
+
+        Notifier::send(
+            $assignment->requested_by,
+            'affectation_rejetee',
+            'Affectation rejetée',
+            'Motif : '.$request->validated('motif'),
+            '/patrimoine/'.$assignment->asset_id
+        );
 
         return new AssetAssignmentResource(
             $assignment->fresh()->load('asset:id,reference,designation,type')
