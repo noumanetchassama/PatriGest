@@ -76,3 +76,14 @@ Le dépôt se trouve dans `C:\PatriGest`, hors de OneDrive. L'ancienne copie
 sous `OneDrive\Desktop\PatriGesti` est abandonnée : y lancer `docker
 compose` recréerait un second projet sur le port 8080 et casserait
 l'application.
+
+## Déploiement Render
+
+Pour conserver les connexions après un redémarrage ou entre plusieurs
+instances, configurez le service web avec `SESSION_DRIVER=database` et
+connectez-le à une base PostgreSQL persistante. Exécutez les migrations
+Laravel au déploiement afin de créer notamment la table `sessions`.
+Définissez également une `APP_KEY` stable (ne la régénérez pas à chaque
+démarrage), `APP_ENV=production` et `SESSION_SECURE_COOKIE=true`. Utilisez
+l'URL HTTPS publique comme `APP_URL` et laissez `SESSION_DOMAIN` vide sauf
+si l'application doit partager ses cookies entre plusieurs sous-domaines.
