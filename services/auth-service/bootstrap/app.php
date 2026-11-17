@@ -34,7 +34,20 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // 419 « Page expirée » (jeton CSRF/session périmé, ex. page
+        // login servie depuis le cache navigateur) : on renvoie
+        // proprement vers /login avec un message au lieu de la page
+        // d'erreur. Les requêtes API conservent la réponse 419.
+        $exceptions->respond(function ($response, $exception, Request $request) {
+            if ($response->getStatusCode() === 419
+                && ! $request->is('api/*')
+                && ! $request->expectsJson()) {
+                return redirect()->route('login')
+                    ->withErrors(['login' => 'Votre session a expiré. Veuillez réessayer.']);
+            }
+
+            return $response;
+        });
     })->create();
 
     

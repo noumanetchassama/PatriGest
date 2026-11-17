@@ -15,13 +15,16 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showLogin(): View|RedirectResponse
+    public function showLogin(): \Illuminate\Http\Response|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
 
-        return view('auth.login');
+        // no-store : le navigateur ne doit jamais resservir cette page
+        // depuis son cache (jeton CSRF périmé → erreur 419 au login).
+        return response()->view('auth.login')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     public function login(Request $request): RedirectResponse
