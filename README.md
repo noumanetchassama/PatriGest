@@ -79,15 +79,40 @@ l'application.
 
 ## Déploiement Render
 
-Pour conserver les connexions après un redémarrage ou entre plusieurs
-instances, configurez le service web avec `SESSION_DRIVER=database` et
-connectez-le à une base PostgreSQL persistante. Exécutez les migrations
-Laravel au déploiement afin de créer notamment la table `sessions`.
-Définissez également une `APP_KEY` stable (ne la régénérez pas à chaque
-démarrage), `APP_ENV=production` et `SESSION_SECURE_COOKIE=true`. Utilisez
-l'URL HTTPS publique comme `APP_URL` et laissez `SESSION_DOMAIN` vide sauf
-si l'application doit partager ses cookies entre plusieurs sous-domaines.
-La configuration Nginx de Render transmet les en-têtes `X-Forwarded-*` à
-Laravel : ils sont nécessaires pour que les redirections et les cookies de
-session reconnaissent correctement le HTTPS terminé par Render. Redéployez
-l'image après toute modification de cette configuration.
+L'image Docker unique contient nginx + les deux PHP-FPM. Au démarrage,
+`infrastructure/docker/entrypoint.sh` :
+
+1. génère les `.env` des deux services depuis les variables d'environnement ;
+2. attend PostgreSQL puis **crée `auth_service` et `asset_db` si absentes** ;
+3. exécute `migrate --force` sur les deux services et `db:seed --force`
+   sur l'auth-service (idempotent — les comptes de démo sont recréés à
+   chaque déploiement, mot de passe `PatriGest@2026`) ;
+4. démarre nginx + php-fpm via supervisord.
+
+### Variables d'environnement à définir sur Render
+
+| Variable | Exemple | Rôle |
+|---|---|---|
+| `APP_URL` | `https://patrigest.onrender.com` | URL publique (redirections, URLs générées) |
+| `DB_HOST` | `dpg-xxxx-a` | Hôte PostgreSQL Render (interne) |
+| `DB_PORT` | `5432` | Port PostgreSQL |
+| `DB_USERNAME` | `patri_user` | Utilisateur PostgreSQL |
+| `DB_PASSWORD` | `•••` | Mot de passe PostgreSQL |
+| `APP_KEY` | `base64:…` | Clé de chiffrement (partagée par défaut) |
+| `APP_KEY_AUTH` / `APP_KEY_ASSET` | `base64:…` | Clés séparées (optionnel, prioritaire sur `APP_KEY`) |
+| `ASSET_SERVICE_URL` | `http://localhost:10000` | URL interne asset-service (via nginx) |
+| `AUTH_SERVICE_URL` | `http://localhost:10000` | URL interne auth-service (via nginx) |
+| `APP_ENV` | `production` | Optionnel |
+| `APP_DEBUG` | `false` | Optionnel |
+
+Si `APP_KEY` est absente, une clé est générée à chaque démarrage (les
+sessions sont alors invalidées à chaque redéploiement — définissez-la
+pour la stabilité). Les sessions utilisent le driver `database` : la
+table `sessions` est créée par les migrations.
+
+### ⚠️ Piège proxy résolu
+
+`trustProxies` ne fait pas confiance à `X-Forwarded-Host` (envoyé vide
+par Render/Cloudflare, ce qui produisait des URLs `https:/https:/login`).
+Le `Host` réel transmis par nginx fait foi. Si `APP_URL` est en HTTPS,
+`URL::forceRootUrl()` l'utilise en priorité pour les URLs absolues.

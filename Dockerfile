@@ -59,6 +59,7 @@ COPY infrastructure/nginx/render.conf /etc/nginx/conf.d/default.conf
 COPY infrastructure/php-fpm/auth.conf /usr/local/etc/php-fpm-auth.conf
 COPY infrastructure/php-fpm/asset.conf /usr/local/etc/php-fpm-asset.conf
 COPY infrastructure/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY infrastructure/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN rm -f /etc/nginx/sites-enabled/default \
     && mkdir -p /run/nginx /var/log/supervisor \
@@ -73,5 +74,7 @@ RUN rm -f /etc/nginx/sites-enabled/default \
        /var/www/asset/storage /var/www/asset/bootstrap/cache \
     && chmod -R ug+rwX \
        /var/www/auth/storage /var/www/auth/bootstrap/cache \
-       /var/www/asset/storage /var/www/asset/bootstrap/cache
-       CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+       /var/www/asset/storage /var/www/asset/bootstrap/cache \
+    && chmod +x /usr/local/bin/entrypoint.sh
+
+CMD ["/usr/local/bin/entrypoint.sh"]
