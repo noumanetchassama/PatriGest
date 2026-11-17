@@ -58,6 +58,7 @@ COPY --from=assets-build /build/asset/public/build /var/www/asset/public/build
 COPY infrastructure/nginx/render.conf /etc/nginx/conf.d/default.conf
 COPY infrastructure/php-fpm/auth.conf /usr/local/etc/php-fpm-auth.conf
 COPY infrastructure/php-fpm/asset.conf /usr/local/etc/php-fpm-asset.conf
+COPY infrastructure/php/opcache-prod.ini /usr/local/etc/php/conf.d/zz-opcache-prod.ini
 COPY infrastructure/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY infrastructure/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 

@@ -107,13 +107,21 @@ php -r '
     }
 '
 
-# ---------- 4. Migrations + seed ----------
+# ---------- 4. Migrations + seed + caches Laravel ----------
 log "Migrations auth-service"
 (cd "$AUTH_DIR" && su -s /bin/sh www-data -c "php artisan migrate --force")
 log "Migrations asset-service"
 (cd "$ASSET_DIR" && su -s /bin/sh www-data -c "php artisan migrate --force")
 log "Seed auth-service (utilisateurs de démo)"
 (cd "$AUTH_DIR" && su -s /bin/sh www-data -c "php artisan db:seed --force") || log "Seed ignoré (déjà présent ou erreur)"
+
+# Caches Laravel : config + vues compilées (route:cache impossible —
+# des routes utilisent des closures). Gros gain de latence au boot.
+for dir in "$AUTH_DIR" "$ASSET_DIR"; do
+    (cd "$dir" && su -s /bin/sh www-data -c "php artisan config:cache && php artisan view:cache") \
+        && log "Caches Laravel OK ($dir)" \
+        || log "ATTENTION: cache Laravel échoué ($dir) — poursuite sans cache"
+done
 
 # ---------- 5. Démarrage ----------
 log "Démarrage de supervisord (nginx + php-fpm auth/asset)"
