@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,8 +14,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-        // Faire confiance au proxy HTTPS de Render
-        $middleware->trustProxies(at: '*');
+        // Faire confiance au proxy HTTPS de Render.
+        // X-Forwarded-Host n'est PAS fiable chez Render/Cloudflare (envoyé
+        // vide) : on garde le vrai Host transmis par nginx. Sans cela,
+        // getHost() renvoie vide et les URLs générées deviennent
+        // « https:/login » puis « https:/https:/login » (404).
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PREFIX,
+        );
 
         $middleware->alias([
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
@@ -25,3 +36,5 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
+
+    

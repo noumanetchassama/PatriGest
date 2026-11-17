@@ -28,12 +28,14 @@ class WebAuthTest extends TestCase
 
     public function test_redirect_behind_https_proxy_preserves_public_scheme_and_host(): void
     {
+        // X-Forwarded-Host n'est pas fiable chez Render (envoyé vide) :
+        // le Host réel transmis par nginx fait foi.
         $this->withHeaders([
             'X-Forwarded-For' => '203.0.113.10',
-            'X-Forwarded-Host' => 'patrigest.onrender.com',
             'X-Forwarded-Port' => '443',
             'X-Forwarded-Proto' => 'https',
-        ])->get('/')
+            'X-Forwarded-Host' => '',
+        ])->get('http://patrigest.onrender.com/')
             ->assertRedirect('https://patrigest.onrender.com/login');
     }
 

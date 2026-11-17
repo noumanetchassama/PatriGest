@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Support\AssetApiClient;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +22,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Derrière un proxy HTTPS (Render), les URLs absolues doivent
+        // utiliser APP_URL pour éviter les hôtes vides détectés.
+        $appUrl = (string) config('app.url');
+        if (str_starts_with($appUrl, 'https://')) {
+            URL::forceRootUrl(rtrim($appUrl, '/'));
+            URL::forceScheme('https');
+        }
+
         // Badge de notifications non lues dans la topbar (layout authentifié).
         View::composer('layouts.app', function ($view) {
             $request = request();
