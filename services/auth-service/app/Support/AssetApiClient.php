@@ -49,7 +49,8 @@ class AssetApiClient
         }
 
         try {
-            return Http::timeout(100)
+            return Http::connectTimeout(3)
+                ->timeout(100)
                 ->withToken($this->token)
                 ->acceptJson()
                 ->attach('file', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
@@ -71,7 +72,8 @@ class AssetApiClient
         }
 
         try {
-            $pending = Http::timeout(100)
+            $pending = Http::connectTimeout(3)
+                ->timeout(10)
                 ->withToken($this->token)
                 ->acceptJson();
 
@@ -122,7 +124,8 @@ class AssetApiClient
             $responses = Http::pool(fn ($pool) => collect($requests)
                 ->map(fn ($query, $key) => $pool
                     ->as($key)
-                    ->timeout(100)
+                    ->connectTimeout(3)
+                    ->timeout(10)
                     ->withToken($this->token)
                     ->acceptJson()
                     ->get($base.$key, $query ?? []))

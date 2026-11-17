@@ -87,3 +87,7 @@ Définissez également une `APP_KEY` stable (ne la régénérez pas à chaque
 démarrage), `APP_ENV=production` et `SESSION_SECURE_COOKIE=true`. Utilisez
 l'URL HTTPS publique comme `APP_URL` et laissez `SESSION_DOMAIN` vide sauf
 si l'application doit partager ses cookies entre plusieurs sous-domaines.
+La configuration Nginx de Render transmet les en-têtes `X-Forwarded-*` à
+Laravel : ils sont nécessaires pour que les redirections et les cookies de
+session reconnaissent correctement le HTTPS terminé par Render. Redéployez
+l'image après toute modification de cette configuration.

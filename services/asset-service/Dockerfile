@@ -35,6 +35,14 @@ RUN composer install \
     --prefer-dist \
     --optimize-autoloader
 
+# The dashboard fans out several API requests at once.
+RUN sed -i 's/^pm.max_children = 5$/pm.max_children = 8/' /usr/local/etc/php-fpm.d/www.conf \
+    && sed -i 's/^pm.min_spare_servers = 1$/pm.min_spare_servers = 2/' /usr/local/etc/php-fpm.d/www.conf \
+    && sed -i 's/^pm.max_spare_servers = 3$/pm.max_spare_servers = 6/' /usr/local/etc/php-fpm.d/www.conf \
+    && grep -q '^pm.max_children = 8$' /usr/local/etc/php-fpm.d/www.conf \
+    && grep -q '^pm.min_spare_servers = 2$' /usr/local/etc/php-fpm.d/www.conf \
+    && grep -q '^pm.max_spare_servers = 6$' /usr/local/etc/php-fpm.d/www.conf
+
 # Permissions Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
 

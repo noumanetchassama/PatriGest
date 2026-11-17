@@ -26,9 +26,22 @@ class WebAuthTest extends TestCase
         $this->get('/dashboard')->assertRedirect(route('login'));
     }
 
+    public function test_redirect_behind_https_proxy_preserves_public_scheme_and_host(): void
+    {
+        $this->withHeaders([
+            'X-Forwarded-For' => '203.0.113.10',
+            'X-Forwarded-Host' => 'patrigest.onrender.com',
+            'X-Forwarded-Port' => '443',
+            'X-Forwarded-Proto' => 'https',
+        ])->get('/')
+            ->assertRedirect('https://patrigest.onrender.com/login');
+    }
+
     public function test_login_page_is_displayed(): void
     {
-        $this->get('/login')->assertOk();
+        $this->get('/login')
+            ->assertOk()
+            ->assertCookie(config('session.cookie'));
     }
 
     public function test_user_can_login_via_web_form(): void
