@@ -18,7 +18,7 @@ Les `vendor/` des deux services sont des **volumes nommés**
 (`auth_vendor`, `asset_vendor`) : les dossiers `vendor/` locaux doivent
 simplement exister (points de montage), leur contenu est ignoré.
 
-- Front : http://localhost:8080 — `admin@mfb.patri.test` / `PatriGest@2026`
+- Front : http://localhost:8080 — comptes de démo créés par `DemoDataSeeder` (identifiants dans le seeder, réservés au dev local)
 - PostgreSQL : localhost:5432 (`patri_user` / `patri_dev_password`)
 - Bases : `auth_service`, `asset_db` (créée par `asset-db-init`)
 

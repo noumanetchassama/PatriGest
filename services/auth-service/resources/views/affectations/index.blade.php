@@ -51,7 +51,7 @@
                 <tr class="border-b border-border/60 last:border-0">
                     <td class="td font-medium">#{{ $a['id'] }}</td>
                     <td class="td">{{ $a['asset_reference'] ?? 'Bien #'.($a['asset_id'] ?? '?') }}</td>
-                    <td class="td">{{ $a['custodian_user_id'] ? 'Utilisateur #'.$a['custodian_user_id'] : '—' }}</td>
+                    <td class="td">{{ \App\Support\Labels::user($a['custodian_user_id'] ?? null) }}</td>
                     <td class="td text-muted">{{ $a['motif'] ?? '—' }}</td>
                     <td class="td"><x-status-badge :status="$a['status']" /></td>
                     <td class="td text-xs text-muted">{{ $a['decision_motif'] ?? '' }}</td>

@@ -10,8 +10,10 @@
     </div>
     @if ($canExport ?? false)
         <div class="flex gap-2">
-            <a href="{{ route('rapports.export', 'overview') }}" class="btn-secondary text-sm">Exporter la synthèse (CSV)</a>
-            <a href="{{ route('rapports.export', 'assets') }}" class="btn-secondary text-sm">Exporter les biens (CSV)</a>
+            <a href="{{ route('rapports.export', 'overview') }}" class="btn-secondary text-sm">Synthèse CSV</a>
+            <a href="{{ route('rapports.export', 'assets') }}" class="btn-secondary text-sm">Biens CSV</a>
+            <a href="{{ route('rapports.pdf', 'overview') }}" class="btn-secondary text-sm">Synthèse PDF</a>
+            <a href="{{ route('rapports.pdf', 'assets') }}" class="btn-secondary text-sm">Biens PDF</a>
         </div>
     @endif
 </div>

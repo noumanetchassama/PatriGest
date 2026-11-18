@@ -168,6 +168,58 @@ class ModuleController extends Controller
         return $this->csvResponse('rapport_synthese_'.now()->format('Ymd_His').'.csv', $rows);
     }
 
+    /** Export PDF : `overview` (synthèse) ou `assets` (liste des biens). */
+    public function rapportsPdf(Request $request, string $type): \Symfony\Component\HttpFoundation\Response
+    {
+        abort_unless($request->user()->can('view-reports'), 403);
+        abort_unless(in_array($type, ['assets', 'overview'], true), 404);
+        abort_unless(class_exists(\Dompdf\Dompdf::class), 503, 'Génération PDF indisponible.');
+
+        $api = AssetApiClient::forSession($request);
+        $stamp = now()->format('Ymd_His');
+
+        if ($type === 'overview') {
+            $res = $api->get('/api/v1/reports/overview');
+            abort_unless($res?->successful(), 502, 'Service patrimoine indisponible.');
+
+            $html = view('rapports.pdf-overview', [
+                'overview' => $res->json('data') ?? [],
+                'generatedAt' => now(),
+            ])->render();
+            $filename = 'rapport_synthese_'.$stamp.'.pdf';
+        } else {
+            $items = [];
+            for ($page = 1; $page <= 20; $page++) {
+                $res = $api->get('/api/v1/assets', ['per_page' => 100, 'page' => $page]);
+                abort_unless($res?->successful(), 502, 'Service patrimoine indisponible.');
+
+                foreach ($res->json('data') ?? [] as $a) {
+                    $items[] = $a;
+                }
+
+                if ($page >= (int) ($res->json('meta.last_page') ?? 1)) {
+                    break;
+                }
+            }
+
+            $html = view('rapports.pdf-assets', [
+                'items' => $items,
+                'generatedAt' => now(),
+            ])->render();
+            $filename = 'patrimoine_'.$stamp.'.pdf';
+        }
+
+        $pdf = new \Dompdf\Dompdf();
+        $pdf->loadHtml($html);
+        $pdf->setPaper('A4', $type === 'assets' ? 'landscape' : 'portrait');
+        $pdf->render();
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
     private function csvResponse(string $filename, array $rows): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         return response()->streamDownload(function () use ($rows) {

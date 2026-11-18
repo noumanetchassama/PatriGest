@@ -52,7 +52,11 @@
                     <td class="td font-medium">#{{ $t['id'] }}</td>
                     <td class="td">{{ $t['asset_reference'] ?? 'Bien #'.($t['asset_id'] ?? '?') }}</td>
                     <td class="td text-muted">
-                        {{ collect([$t['to_direction_id'] ?? null, $t['to_service_id'] ?? null, $t['to_custodian_user_id'] ?? null])->filter(fn($v) => $v !== null)->map(fn($v) => '#'.$v)->implode(' · ') ?: '—' }}
+                        {{ collect([
+                            $t['to_direction_id'] ?? null ? 'Direction : '.\App\Support\Labels::structure($t['to_direction_id']) : null,
+                            $t['to_service_id'] ?? null ? 'Service : '.\App\Support\Labels::structure($t['to_service_id']) : null,
+                            $t['to_custodian_user_id'] ?? null ? 'Dépositaire : '.\App\Support\Labels::user($t['to_custodian_user_id']) : null,
+                        ])->filter()->implode(' · ') ?: '—' }}
                     </td>
                     <td class="td text-muted">{{ $t['motif'] ?? '—' }}</td>
                     <td class="td"><x-status-badge :status="$t['status']" /></td>

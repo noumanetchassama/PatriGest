@@ -125,14 +125,14 @@ class AssetController extends Controller
         });
 
         return (new AssetResource(
-            $asset->fresh()->load(self::DETAIL_RELATIONS[$asset->type], 'currentLocation')
+            $asset->fresh()->load([self::DETAIL_RELATIONS[$asset->type], 'currentLocation'])
         ))->response()->setStatusCode(201);
     }
 
     public function show(Request $request, Asset $asset): AssetResource
     {
         return new AssetResource(
-            $asset->load(array_values(self::DETAIL_RELATIONS), 'currentLocation')
+            $asset->load([...array_values(self::DETAIL_RELATIONS), 'currentLocation'])
         );
     }
 
@@ -155,7 +155,7 @@ class AssetController extends Controller
         }
 
         return new AssetResource(
-            $asset->fresh()->load(array_values(self::DETAIL_RELATIONS), 'currentLocation')
+            $asset->fresh()->load([...array_values(self::DETAIL_RELATIONS), 'currentLocation'])
         );
     }
 

@@ -17,7 +17,7 @@ class PatrimoineController extends Controller
         $api = AssetApiClient::forSession($request);
 
         $query = array_filter([
-            'q' => $request->input('q'),
+            'search' => $request->input('q'),
             'type' => $request->input('type'),
             'status' => $request->input('status'),
             'page' => $request->input('page', 1),

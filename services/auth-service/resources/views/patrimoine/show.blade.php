@@ -75,6 +75,7 @@
                 </p>
                 @if (!empty($loc['latitude']) && !empty($loc['longitude']))
                     <p class="mt-1 text-xs text-muted">GPS : {{ $loc['latitude'] }}, {{ $loc['longitude'] }}</p>
+                    <div id="asset-map" class="mt-3 h-64 w-full overflow-hidden rounded-lg border border-border"></div>
                 @endif
             @else
                 <p class="text-sm text-muted">Aucune localisation renseignée.</p>
@@ -143,9 +144,9 @@
         <div class="card">
             <h2 class="mb-3 text-base font-bold text-navy">Affectation</h2>
             <dl class="space-y-2 text-sm">
-                <div class="flex justify-between"><dt class="text-muted">Service</dt><dd class="font-medium">{{ $d['service_id'] ? 'Service #'.$d['service_id'] : '—' }}</dd></div>
-                <div class="flex justify-between"><dt class="text-muted">Direction</dt><dd class="font-medium">{{ $d['direction_id'] ? 'Direction #'.$d['direction_id'] : '—' }}</dd></div>
-                <div class="flex justify-between"><dt class="text-muted">Dépositaire</dt><dd class="font-medium">{{ $d['custodian_user_id'] ? 'Utilisateur #'.$d['custodian_user_id'] : 'Non affecté' }}</dd></div>
+                <div class="flex justify-between"><dt class="text-muted">Service</dt><dd class="font-medium">{{ \App\Support\Labels::structure($d['service_id'] ?? null) }}</dd></div>
+                <div class="flex justify-between"><dt class="text-muted">Direction</dt><dd class="font-medium">{{ \App\Support\Labels::structure($d['direction_id'] ?? null) }}</dd></div>
+                <div class="flex justify-between"><dt class="text-muted">Dépositaire</dt><dd class="font-medium">{{ $d['custodian_user_id'] ? \App\Support\Labels::user($d['custodian_user_id']) : 'Non affecté' }}</dd></div>
             </dl>
         </div>
         <div class="card">
@@ -159,3 +160,22 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    @if (!empty($loc['latitude']) && !empty($loc['longitude']))
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const map = L.map('asset-map').setView([{{ $loc['latitude'] }}, {{ $loc['longitude'] }}], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap',
+                    maxZoom: 19,
+                }).addTo(map);
+                L.marker([{{ $loc['latitude'] }}, {{ $loc['longitude'] }}])
+                    .addTo(map)
+                    .bindPopup('{{ addslashes($d['designation'] ?? 'Bien') }}');
+            });
+        </script>
+    @endif
+@endpush

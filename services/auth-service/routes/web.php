@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents', [ModuleController::class, 'documents'])->name('documents.index');
     Route::get('/rapports', [ModuleController::class, 'rapports'])->name('rapports.index');
     Route::get('/rapports/export/{type}', [ModuleController::class, 'rapportsExport'])->whereIn('type', ['assets', 'overview'])->name('rapports.export');
+    Route::get('/rapports/pdf/{type}', [ModuleController::class, 'rapportsPdf'])->whereIn('type', ['assets', 'overview'])->name('rapports.pdf');
     Route::get('/notifications', [ModuleController::class, 'notifications'])->name('notifications.index');
     Route::post('/notifications/read-all', [ModuleController::class, 'notificationsReadAll'])->name('notifications.read-all');
     Route::post('/notifications/{id}/read', [ModuleController::class, 'notificationRead'])->whereNumber('id')->name('notifications.read');

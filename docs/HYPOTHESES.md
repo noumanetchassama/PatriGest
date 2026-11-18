@@ -16,7 +16,7 @@ Chaque hypothèse validée ou infirmée doit être mise à jour ici.
 | H7 | Un utilisateur peut appartenir à plusieurs structures administratives via `user_structure`, avec une structure `is_primary`. | Implémenté |
 | H8 | Les structures forment un arbre `parent_id` auto-référencé (administration → direction → service), avec suppression logique (`softDeletes`). | Implémenté |
 | H9 | La hiérarchie stricte administration→direction→service n'est pas encore forcée en base (le champ `type` est libre parmi les 3 valeurs). À durcir si besoin. | À valider |
-| H10 | Le mot de passe de démonstration `PatriGest@2026` est réservé au seed de développement. | À changer en production |
+| H10 | Le mot de passe de démonstration (défini dans `DemoDataSeeder`) est réservé au seed de développement. | À changer en production |
 | H11 | Les journaux `login_logs` et `audit_logs` sont conservés sans purge pour l'instant. Une politique de rétention sera à définir. | À valider |
 | H12 | Le « journal d'audit » enregistre pour l'instant les actions Auth Service (login, CRUD users/rôles/structures). Les autres services devront émettre leurs propres événements d'audit ou appeler une API commune — à concevoir en Phase 3. | À concevoir |
 | H13 | Auth inter-services : l'asset-service vérifie les tokens en appelant `/api/v1/auth/me` de l'auth-service via nginx (`http://nginx`), résultat mis en cache 300 s. **Transitoire** — à remplacer par des jetons signés ou un introspection endpoint dédié. | Implémenté (provisoire) |

@@ -44,7 +44,7 @@
                 <tr class="border-b border-border/60 last:border-0 align-top">
                     <td class="td font-medium">#{{ $item['id'] }}</td>
                     <td class="td">{{ $item['asset_reference'] ?? 'Bien #'.($item['asset_id'] ?? '?') }}</td>
-                    <td class="td">{{ $item['requested_by'] ? 'Utilisateur #'.$item['requested_by'] : '—' }}</td>
+                    <td class="td">{{ \App\Support\Labels::user($item['requested_by'] ?? null) }}</td>
                     <td class="td text-muted">{{ $item['motif'] ?? '—' }}</td>
                     <td class="td text-muted">{{ $item['created_at'] ? \Illuminate\Support\Carbon::parse($item['created_at'])->format('d/m/Y H:i') : '—' }}</td>
                     <td class="td">

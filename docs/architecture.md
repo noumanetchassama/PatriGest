@@ -51,7 +51,7 @@ Navigateur ──► nginx (:8080) ──► auth-service (php-fpm:9000) ──�
   `App\Support\AuditLogger::log()`. `login_logs` pour les tentatives de connexion.
 - **Seeders** : `RolesAndPermissionsSeeder` (permissions + matrice des 9 rôles),
   `DemoDataSeeder` (arborescence MFB fictive + 1 utilisateur par rôle,
-  mot de passe `PatriGest@2026`).
+  mot de passe défini par le seeder de démonstration).
 
 ## Décisions techniques
 

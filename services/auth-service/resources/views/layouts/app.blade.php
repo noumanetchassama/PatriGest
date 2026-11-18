@@ -58,12 +58,12 @@
     {{-- Contenu --}}
     <div class="ml-[230px] flex min-h-screen flex-1 flex-col">
         <header class="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border bg-white px-6 py-3">
-            <div class="relative w-full max-w-md">
+            <form method="GET" action="{{ route('patrimoine.index') }}" class="relative w-full max-w-md">
                 <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0z"/>
                 </svg>
-                <input type="search" placeholder="Rechercher un bien, une référence…" class="input pl-9">
-            </div>
+                <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher un bien, une référence…" class="input pl-9">
+            </form>
             <div class="flex items-center gap-4">
                 <a href="{{ route('notifications.index') }}" class="relative rounded-lg p-2 text-muted hover:bg-primary-light">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
